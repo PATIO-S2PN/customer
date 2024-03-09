@@ -9,6 +9,11 @@ class CustomerRepository {
       password,
       salt,
       phone,
+      otp: '',
+      otp_expiry: '',
+      firstName: '',
+      lastName: '',
+      verified: false,
       address: [],
     });
 

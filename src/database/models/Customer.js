@@ -4,10 +4,15 @@ const Schema = mongoose.Schema;
 
 const CustomerSchema = new Schema(
   {
-    email: String,
-    password: String,
-    salt: String,
-    phone: String,
+    email: {type: String, required: true},
+    password:  {type: String, required: true},
+    salt:  {type: String, required: true},
+    firstName:  {type: String},
+    lastName: {type: String},
+    phone: {type: String, required: true},
+    verified: {type: Boolean},
+    otp: {type: Number},
+    otp_expiry: {type: Date},
     address: [{ type: Schema.Types.ObjectId, ref: "address", require: true }],
   },
   {
@@ -16,6 +21,8 @@ const CustomerSchema = new Schema(
         delete ret.password;
         delete ret.salt;
         delete ret.__v;
+        delete ret.createdAt;
+        delete ret.updatedAt;
       },
     },
     timestamps: true,

@@ -43,6 +43,12 @@ class CustomerService {
   async SignUp(userInputs) {
     const { email, password, phone } = userInputs;
 
+    // Check if a user with the same email already exists
+    const existingUser = await this.repository.FindCustomer({ email });
+    if (existingUser) {
+      throw new Error('A user with this email already exists');
+    }
+
     // create salt
     let salt = await GenerateSalt();
 
