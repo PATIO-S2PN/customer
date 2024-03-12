@@ -13,6 +13,7 @@ const {
   NotFoundError,
   ValidationError,
 } = require("../utils/errors/app-errors");
+const { VERIFICATION_URL, RESET_URL } = require("../config");
 
 // All Business logic will be here
 class CustomerService {
@@ -101,8 +102,10 @@ class CustomerService {
     });
 
     // Send verification email
-    const verificationUrl = `http://localhost:3000/verify/${verifyToken}`;
+    const verificationUrl =VERIFICATION_URL + verifyToken;
     console.log(verificationUrl);
+
+    
     await sendEmail({
       to: newUser.email,
       subject: 'Verify Your Email',
@@ -149,6 +152,60 @@ class CustomerService {
 
     return { message: 'Email verified successfully' };
   }
+
+  async ResetPassword(token, password) {
+    // Find a user with the provided reset token
+    const customer = await this.repository.FindCustomerByResetToken({ resetToken: token });
+    if (!customer) {
+      throw new NotFoundError('Invalid or expired token');
+    }
+
+    if (customer.resetTokenExpiry < Date.now()) {
+      throw new ValidationError('Token has expired');
+    }
+
+    // Generate a new salt and hash the new password
+    const salt = await GenerateSalt();
+    const hashedPassword = await GeneratePassword(password, salt);
+
+    // Update the user's password, salt, and remove the reset token
+    await this.repository.UpdateCustomerById(customer._id, {
+      password: hashedPassword,
+      salt: salt,
+      resetToken: null,
+      resetTokenExpiry: null,
+    });
+
+    return { message: 'Password reset successful' };
+  }
+  
+  async ResetPasswordLink(email) {
+    // Check if a user with the provided email exists
+    const customer = await this.repository.FindCustomer({ email });
+    if (!customer) {
+      throw new NotFoundError('No user found with this email.');
+    }
+    const resetToken = uuidv4();
+    const resetTokenExpiry = Date.now() + 3600000; // 1 hour from now
+
+    // Assuming you have a method in your repository to update the customer
+    await this.repository.UpdateCustomerById(customer._id, {
+      resetToken: resetToken,
+      resetTokenExpiry: resetTokenExpiry,
+    });
+
+    const resetUrl = RESET_URL + resetToken;
+    console.log(resetUrl);
+    await sendEmail({
+      to: customer.email,
+      subject: 'Password Reset',
+      html: `Please click this link to reset your password: <a href="${resetUrl}">${resetUrl}</a>`,
+    });
+
+    // Return a meaningful message back to the controller to be sent to the user
+    return { message: 'Password reset email sent.' };
+}
+
 
   async DeleteProfile(userId) {
     const data = await this.repository.DeleteCustomerById(userId);

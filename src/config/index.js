@@ -32,6 +32,8 @@ module.exports = {
   APP_SECRET: process.env.APP_SECRET,
   EXCHANGE_NAME: process.env.EXCHANGE_NAME,
   MSG_QUEUE_URL: process.env.MSG_QUEUE_URL,
+  VERIFICATION_URL: process.env.VERIFICATION_URL,
+  RESET_URL: process.env.RESET_PASSWORD_URL,
   CUSTOMER_SERVICE: "customer_service",
   SHOPPING_SERVICE: "shopping_service",
 };

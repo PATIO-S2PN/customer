@@ -10,7 +10,9 @@ class CustomerRepository {
       salt,
       phone,
       verifyToken,
-      verifyTokenExpiry,  
+      verifyTokenExpiry,
+      resetToken: '',
+      resetTokenExpiry: '',  
       otp: '',
       otp_expiry: '',
       firstName: '',
@@ -49,6 +51,11 @@ class CustomerRepository {
 
   async FindCustomerByToken({ verifyToken }) {
     const existingCustomer = await CustomerModel.findOne({ verifyToken: verifyToken });
+    return existingCustomer;
+  }
+
+  async FindCustomerByResetToken({ resetToken }) {
+    const existingCustomer = await CustomerModel.findOne({ resetToken : resetToken });
     return existingCustomer;
   }
 

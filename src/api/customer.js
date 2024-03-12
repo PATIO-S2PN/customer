@@ -77,6 +77,26 @@ module.exports = (app, channel) => {
     }
 });
 
+app.post('/forgot-password', async (req, res, next) => {
+  try {
+      const { email } = req.body;
+      const data = await service.ResetPasswordLink(email); // Pass email directly
+      return res.json(data);
+  } catch (error) {
+      next(error);
+  }
+});
+
+app.post('/reset-password', async (req, res, next) => {
+  try {
+      const { token, password } = req.body;
+      const data = await service.ResetPassword(token, password);
+      return res.json(data);
+  } catch (error) {
+      next(error);
+  }
+});
+
   app.get("/whoami", (req, res, next) => {
     return res.status(200).json({ msg: "/customer : I am Customer Service" });
   });
