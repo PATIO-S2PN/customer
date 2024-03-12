@@ -3,17 +3,19 @@ const { CustomerModel, AddressModel } = require("../models");
 
 //Dealing with data base operations
 class CustomerRepository {
-  async CreateCustomer({ email, password, phone, salt }) {
+  async CreateCustomer({ email, password, phone, salt, verifyToken, verifyTokenExpiry}) {
     const customer = new CustomerModel({
       email,
       password,
       salt,
       phone,
+      verifyToken,
+      verifyTokenExpiry,  
       otp: '',
       otp_expiry: '',
       firstName: '',
       lastName: '',
-      verified: false,
+      isVerified: false,
       address: [],
     });
 
@@ -44,6 +46,19 @@ class CustomerRepository {
     const existingCustomer = await CustomerModel.findOne({ email: email });
     return existingCustomer;
   }
+
+  async FindCustomerByToken({ verifyToken }) {
+    const existingCustomer = await CustomerModel.findOne({ verifyToken: verifyToken });
+    return existingCustomer;
+  }
+
+  async UpdateCustomerById(id, data) {
+    const existingCustomer = await CustomerModel.findByIdAndUpdate(id, data, {
+      new: true,
+    });
+    return existingCustomer;
+  }
+  
 
   async FindCustomerById({ id }) {
     const existingCustomer = await CustomerModel.findById(id).populate(

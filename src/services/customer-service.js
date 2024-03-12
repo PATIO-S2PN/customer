@@ -1,4 +1,7 @@
 const { CustomerRepository } = require("../database");
+const { v4: uuidv4 } = require('uuid');
+const sendEmail = require("../utils/emailSender");
+
 const {
   FormateData,
   GeneratePassword,
@@ -40,6 +43,36 @@ class CustomerService {
     return { id: existingCustomer._id, token };
   }
 
+  // async SignUp(userInputs) {
+  //   const { email, password, phone } = userInputs;
+
+  //   // Check if a user with the same email already exists
+  //   const existingUser = await this.repository.FindCustomer({ email });
+  //   if (existingUser) {
+  //     throw new Error('A user with this email already exists');
+  //   }
+
+
+
+  //   // create salt
+  //   let salt = await GenerateSalt();
+
+  //   let userPassword = await GeneratePassword(password, salt);
+
+  //   const existingCustomer = await this.repository.CreateCustomer({
+  //     email,
+  //     password: userPassword,
+  //     phone,
+  //     salt,
+  //   });
+
+  //   const token = await GenerateSignature({
+  //     email: email,
+  //     _id: existingCustomer._id,
+  //   });
+  //   return { id: existingCustomer._id, token };
+  // }
+
   async SignUp(userInputs) {
     const { email, password, phone } = userInputs;
 
@@ -49,24 +82,37 @@ class CustomerService {
       throw new Error('A user with this email already exists');
     }
 
-    // create salt
-    let salt = await GenerateSalt();
+    // Create salt and hash the password
+    const salt = await GenerateSalt();
+    const userPassword = await GeneratePassword(password, salt);
 
-    let userPassword = await GeneratePassword(password, salt);
+    // Generate a verification token
+    const verifyToken = uuidv4(); // Make sure you have uuid installed and imported
+    const verifyTokenExpiry = Date.now() + 3600000;
 
-    const existingCustomer = await this.repository.CreateCustomer({
+    // Create the user with the hashed password, salt, and verification token
+    const newUser = await this.repository.CreateCustomer({
       email,
       password: userPassword,
       phone,
       salt,
+      verifyToken,
+      verifyTokenExpiry, // Token expiry set to 1 hour
     });
 
-    const token = await GenerateSignature({
-      email: email,
-      _id: existingCustomer._id,
+    // Send verification email
+    const verificationUrl = `http://localhost:3000/verify/${verifyToken}`;
+    console.log(verificationUrl);
+    await sendEmail({
+      to: newUser.email,
+      subject: 'Verify Your Email',
+      html: `Please click this link to verify your email: <a href="${verificationUrl}">${verificationUrl}</a>`,
     });
-    return { id: existingCustomer._id, token };
+
+    // Return a response indicating that a verification email has been sent
+    return { message: "Signup successful, please verify your email." };
   }
+
 
   async AddNewAddress(_id, userInputs) {
     const { street, postalCode, city, country } = userInputs;
@@ -82,6 +128,26 @@ class CustomerService {
 
   async GetProfile(id) {
     return this.repository.FindCustomerById({ id });
+  }
+
+  async VerifyEmail(token) {
+    const customer = await this.repository.FindCustomerByToken({ verifyToken: token });
+    if (!customer) {
+      throw new NotFoundError('Invalid or expired token');
+    }
+
+    if (customer.verifyTokenExpiry < Date.now()) {
+      throw new ValidationError('Token has expired');
+    }
+
+    // Update the user's isVerified field to true and remove the verification token
+    await this.repository.UpdateCustomerById(customer._id, {
+      isVerified: true,
+      verifyToken: null,
+      verifyTokenExpiry: null,
+    });
+
+    return { message: 'Email verified successfully' };
   }
 
   async DeleteProfile(userId) {

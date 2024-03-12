@@ -2,6 +2,7 @@ const CustomerService = require("../services/customer-service");
 const UserAuth = require("./middlewares/auth");
 const { PublishMessage } = require("../utils");
 const { SHOPPING_SERVICE } = require("../config");
+const User = require('../database/models/Customer'); // Make sure this path is correct
 
 module.exports = (app, channel) => {
   const service = new CustomerService();
@@ -63,6 +64,18 @@ module.exports = (app, channel) => {
       next(error);
     }
   });
+
+  app.get('/verify/:token', async (req, res, next) => {
+    try {
+      const { token } = req.params;
+      console.log(token);
+      const data = await service.VerifyEmail(token);
+      return res.json(data);
+    }
+    catch (error) {
+      next(error);
+    }
+});
 
   app.get("/whoami", (req, res, next) => {
     return res.status(200).json({ msg: "/customer : I am Customer Service" });
