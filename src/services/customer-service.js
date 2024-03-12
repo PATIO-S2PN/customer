@@ -133,6 +133,53 @@ class CustomerService {
     return this.repository.FindCustomerById({ id });
   }
 
+  async UpdateProfile(userId, updateFields) {
+    // Specify which fields can be updated to prevent updating of sensitive fields
+    const { firstName, lastName, phone } = updateFields;
+  
+    // Prepare the update object, excluding any fields not allowed or not provided
+    const updates = {};
+    if (firstName !== undefined) updates.firstName = firstName;
+    if (lastName !== undefined) updates.lastName = lastName;
+    if (phone !== undefined) updates.phone = phone;
+    
+    // Update the customer in the database
+    const updatedCustomer = await this.repository.UpdateCustomerById(userId, updates);
+  
+    if (!updatedCustomer) {
+      throw new NotFoundError("User not found.");
+    }
+  
+    // Assuming FormateData formats the output
+    return FormateData(updatedCustomer);
+  }
+  
+  
+
+  async ChangePassword(userId, currentPassword, newPassword) {
+    // Find the user by ID
+    const customer = await this.repository.FindCustomerById({ id: userId });
+    if (!customer) {
+      throw new NotFoundError('User not found');
+    }
+  
+    // Validate current password
+    const validPassword = await ValidatePassword(currentPassword, customer.password, customer.salt);
+    if (!validPassword) {
+      throw new ValidationError('Current password does not match');
+    }
+  
+    // Generate a new salt and hash for the new password
+    const newSalt = await GenerateSalt();
+    const newHashedPassword = await GeneratePassword(newPassword, newSalt);
+  
+    // Update the user's password and salt in the database
+    await this.repository.UpdateCustomerById(customer._id, { password: newHashedPassword, salt: newSalt });
+  
+    return { message: 'Password updated successfully' };
+  }
+  
+
   async VerifyEmail(token) {
     const customer = await this.repository.FindCustomerByToken({ verifyToken: token });
     if (!customer) {

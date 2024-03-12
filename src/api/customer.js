@@ -53,6 +53,35 @@ module.exports = (app, channel) => {
     }
   });
 
+  app.put("/profile", UserAuth, async (req, res, next) => {
+    try {
+      const userId = req.user._id; // Ensure your UserAuth middleware correctly identifies user ID
+      const updateFields = req.body;
+      const data = await service.UpdateProfile(userId, updateFields);
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  
+
+  app.post('/change-password', UserAuth, async (req, res, next) => {
+    try {
+      const userId = req.user._id; // Assuming UserAuth middleware adds user to req
+      const { currentPassword, newPassword } = req.body;
+  
+      // Call the ChangePassword method
+      const result = await service.ChangePassword(userId, currentPassword, newPassword);
+  
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+
+
   app.delete("/profile", UserAuth, async (req, res, next) => {
     try {
       const { _id } = req.user;
