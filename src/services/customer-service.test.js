@@ -1,7 +1,7 @@
 const CustomerService = require('./customer-service');
 const CustomerRepository = require('../database/repository/customer-repository');
 const { ValidatePassword, GenerateSignature } = require('../utils');
-
+//Implementing the tests for the CustomerService class
 jest.mock('../database/repository/customer-repository');
 jest.mock('../utils');
 
