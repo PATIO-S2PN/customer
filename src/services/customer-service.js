@@ -133,6 +133,11 @@ class CustomerService {
     return this.repository.FindCustomerById({ id });
   }
 
+  async GetAllUsers() {
+    const customers = await this.repository.FindCustomers();
+    return FormateData(customers);
+  }
+
   async UpdateProfile(userId, updateFields) {
     // Specify which fields can be updated to prevent updating of sensitive fields
     const { firstName, lastName, phone } = updateFields;
