@@ -64,6 +64,14 @@ module.exports = (app, channel) => {
     }
   });
   
+  app.get("/all", UserAuth, async (req, res, next) => {
+    try {
+      const data = await service.GetAllUsers();
+      return res.json(data);
+    } catch (error) {
+      next(error);
+    }
+  });
   
 
   app.post('/change-password', UserAuth, async (req, res, next) => {
