@@ -18,10 +18,6 @@ logs/
 .vscode/
 .idea/
 
-# Ignore package lock files
-package-lock.json
-yarn.lock
-
 # Ignore test coverage reports
 coverage/
 
