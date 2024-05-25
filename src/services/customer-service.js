@@ -14,8 +14,6 @@ const {
   ValidationError,
 } = require("../utils/errors/app-errors");
 const { VERIFICATION_URL, RESET_URL } = require("../config");
-
-// All Business logic will be here
 class CustomerService {
   constructor() {
     this.repository = new CustomerRepository();
