@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "set NODE_ENV=prod&& node src/index.js",
-    "dev": "set NODE_ENV=dev && nodemon src/index.js",
+    "start": "cross-env NODE_ENV=prod node src/index.js",
+    "dev": "cross-env NODE_ENV=dev nodemon src/index.js",
     "test": "jest"
   },
   "keywords": [],
@@ -27,6 +27,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "jest": "^29.0.3"
   }
 }
