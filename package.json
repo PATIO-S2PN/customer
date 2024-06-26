@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=prod node src/index.js",
-    "dev": "cross-env NODE_ENV=dev nodemon src/index.js",
+    "start": "set NODE_ENV=prod&& node src/index.js",
+    "dev": "set NODE_ENV=dev && nodemon src/index.js",
     "test": "jest"
   },
   "keywords": [],
