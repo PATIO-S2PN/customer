@@ -74,6 +74,11 @@ class CustomerRepository {
     return existingCustomer;
   }
 
+  async FindCustomers() {
+    const existingCustomer = await CustomerModel.find({});
+    return existingCustomer;
+  }
+
   async DeleteCustomerById(id) {
     return CustomerModel.findByIdAndDelete(id);
   }
